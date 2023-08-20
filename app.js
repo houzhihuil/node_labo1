@@ -41,6 +41,7 @@ app.get("/getAllProducts", function(request, response){
         response.status(200).json(result);
     }); 
 });
+ 
 
 app.get("/getProduct/:id", function(request, response){
     const id= request.params.id;
