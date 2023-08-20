@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<style type="text/css">
+			#zoneModificationProduit, #zoneSuppressionProduit, #zoneListeProduit{
+				display : none;
+			}
+		</style>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+		</script>
+		<script type="text/javascript">
+			function rechercherModification(){
+				var idProduit = $("#txtIdM").val();  
+				$.ajax({
+					url:"https://node-labo1.cyclic.cloud/getProduct/"+idProduit,
+					method:"get",
+					dataType:"json",
+					success:function(data){ 
+						if(data.message !="produit trouvé"){
+							alert(data.message)
+						}
+						else{
+							var response = data.data; 
+							$("#txtDescriptionM").val(response.description);
+							$("#txtImageM").val(response.image);  
+							$("#txtPrixM").val(response.prix);
+							$("#txtDetailM").val(response.details); 
+						}
+					},
+					error: function(error){
+						alert("Error"+error);
+					}
+				}); 
+			}
+ 
+			function rechercher(){
+				var idProduit = $("#txtIdS").val();  
+				$.ajax({
+					url:"https://node-labo1.cyclic.cloud/getProduct/"+idProduit,
+					method:"get",
+					dataType:"json",
+					success:function(data){ 
+						if(data.message !="produit trouvé"){
+							alert(data.message)
+						}
+						else{
+							var response = data.data; 
+							$("#txtDescriptionS").val(response.description);
+							$("#txtImageS").val(response.image);  
+							$("#txtPrixS").val(response.prix);
+							$("#txtDetailS").val(response.details); 
+						}
+					},
+					error: function(error){
+						alert("Error"+error);
+					}
+				}); 
+			}
+
+			function enregistrer(){
+				var descriptionProduit = $("#txtDescriptionN").val();
+				var imageProduit = $("#txtImageN").val();
+				var prixProduit = parseFloat($("#txtPrixN").val());
+				var detailProduit = $("#txtDetailN").val(); 
+				alert(descriptionProduit + " " + imageProduit + " " + prixProduit + " " + detailProduit );
+				$.ajax({
+					contentType:"application/json; charset=utf-8",
+					processData: false,
+					url:"https://node-labo1.cyclic.cloud/createProduct/",
+					data: JSON.stringify({
+						description: descriptionProduit,
+						image: imageProduit,
+						prix: prixProduit,
+						details: detailProduit
+					}),
+					method:"post",
+					dataType:"json",
+					success:function(data){  
+							 
+							$("#txtDescriptionN").val(" ");
+							$("#txtImageN").val(" "); 
+							$("#txtPrixN").val(" ");
+							$("#txtDetailN").val(" ");
+						 	alert("Produit enregistré");
+					},
+					error: function(error){
+						alert("Error"+error);
+					}
+				}); 
+			}
+			
+			function modifier(){
+				var idProduit = $("#txtIdM").val();
+				var descriptionProduit = $("#txtDescriptionM").val();
+				var imageProduit = $("#txtImageM").val();
+				var prixProduit = parseFloat($("#txtPrixM").val());
+				var detailProduit = $("#txtDetailM").val(); 
+		
+				$.ajax({
+					url:"https://node-labo1.cyclic.cloud/updateProduct/"+idProduit,
+					contentType:"application/json; charset=utf-8",
+					processData: false, 
+					data: JSON.stringify({
+						description: descriptionProduit,
+						image: imageProduit,
+						prix: prixProduit,
+						details: detailProduit
+					}),
+					method:"put",
+					dataType:"json",
+					success:function(data){ 
+						 
+							$("#txtIdM").val("");
+							$("#txtDescriptionM").val("");
+							$("#txtImageM").val(""); 
+							$("#txtPrixM").val("");
+							$("#txtDetailM").val("");
+						 	alert("Produit modifié");  
+					},
+					 error: function(error){ 
+						console.error("Error"+error);
+					},  
+					 
+				}); 
+			}
+			
+			function supprimer(){ 
+				var idProduit = $("#txtIdS").val();
+				if (confirm("Etes-vous sûr de vouloir supprimer le produit de code "+ idProduit+ " ?")){
+ 
+				$.ajax({
+					url:"https://node-labo1.cyclic.cloud/deleteProduct/"+idProduit,
+					method:"delete",
+					dataType:"json",
+					success:function(data){ 
+						$("#txtDescriptionS").val("");
+						$("#txtImageS").val("");
+						$("#txtPrixS").val("");
+						$("#txtDetailS").val("");
+						alert("Confirmation : "+data)
+					},
+					error: function(error){
+						alert("Error"+error);
+					}
+					}); 
+				} else {
+					alert("Suppression annulée");
+				}
+			}
+
+			function creerProduit(){				
+				$("#zoneModificationProduit").hide();
+				$("#zoneSuppressionProduit").hide();
+				$("#zoneListeProduit").hide();
+				$("#zoneNouveauProduit").show();
+
+			}
+			function modifierProduit(){					
+				$("#zoneSuppressionProduit").hide();
+				$("#zoneListeProduit").hide();
+				$("#zoneNouveauProduit").hide();
+				$("#zoneModificationProduit").show();
+			}
+			function supprimerProduit(){				
+				$("#zoneModificationProduit").hide();				
+				$("#zoneListeProduit").hide();
+				$("#zoneNouveauProduit").hide();
+				$("#zoneSuppressionProduit").show();
+			}
+			function listerProduit(){				
+				$("#zoneModificationProduit").hide();
+				$("#zoneSuppressionProduit").hide();				
+				$("#zoneNouveauProduit").hide();
+				$("#zoneListeProduit").show();
+				
+				var noeudtBody = $("#idCorpsTableau");
+				$.ajax({
+					url: "https://node-labo1.cyclic.cloud/getAllProducts",
+					method:"get",
+					deatType:"json",
+					success: function(data){
+						$.each(data, function (index, produit){
+							var description = produit.description;
+							var image = produit.image;
+							var prix = produit.prix;
+							var details = produit.details;
+							var id = produit.id;
+
+							var noeudTr = $("<tr></tr>");
+							var noeudTd1 = $("<td></td>");
+							$(noeudTd1).text(id);
+							$(noeudTr).append(noeudTd1);
+
+							var noeudTd2 = $("<td></td>");
+							$(noeudTd2).text(description);
+							$(noeudTr).append(noeudTd2);
+
+							var noeudTd3 = $("<td></td>");
+							var noeudTd31 = $("<img/>");
+							$(noeudTd31).attr({src: image, width:"50%"});
+							$(noeudTd3).append(noeudTd31);
+							$(noeudTr).append(noeudTd3);
+
+							var noeudTd4 = $("<td></td>");
+							$(noeudTd4).text(prix);
+							$(noeudTr).append(noeudTd4);
+
+							var noeudTd5 = $("<td></td>");
+							$(noeudTd5).text(details);
+							$(noeudTr).append(noeudTd5);
+
+							$(noeudtBody).append(noeudTr);
+						});
+					},
+					error: function(error){
+						alert('Error '+error);
+					}
+				});  
+			}
+			
+			
+		</script>
+		<title>Exercice 1</title>
+	</head>
+	<body>
+		<p>
+			<input type="button" value="Nouveau Produit" onclick="creerProduit();" />
+			<input type="button" value="Modification de Produit" onclick="modifierProduit();" />
+			<input type="button" value="Suppression de Produit" onclick="supprimerProduit();" />
+			<input type="button" value="Liste Produit" onclick="listerProduit();" />
+		</p>
+		<div id="zoneNouveauProduit">
+			<form>
+				<h1>Nouveau produit</h1>
+				<p>
+					<label>Description</label>
+					<input id="txtDescriptionN" type="text" />
+				</p>
+				<p>
+					<label>Image</label>
+					<input id="txtImageN" type="text" />
+				</p>
+				<p>
+					<label>Prix</label>
+					<input id="txtPrixN" type="text" />
+				</p>
+				<p>
+					<label>Details</label>
+					<input id="txtDetailN" type="text" />
+				</p>
+				<p>					
+					<input  type="button" value="Enregistrer" onclick="enregistrer();" />
+				</p>				
+			</form>
+		</div>
+		<div id="zoneModificationProduit">
+			<form>
+				<h1>Modification de produit</h1>
+				<p>
+						<label>ID du produit</label>
+						<input id="txtIdM" type="text" />
+						<input  type="button" value="Rechercher" onclick="rechercherModification();" />
+				</p>
+				<fieldset>
+					<legend>Modification souhaitée</legend>
+					<p>
+						<label>Description</label>
+						<input id="txtDescriptionM" type="text" />
+					</p>
+					<p>
+						<label>Image</label>
+						<input id="txtImageM" type="text" />
+					</p>
+					<p>
+						<label>Prix</label>
+						<input id="txtPrixM" type="text" />
+					</p>
+					<p>
+						<label>Details</label>
+						<input id="txtDetailM" type="text" />
+					</p>
+					<p>					
+						<input  type="button" value="Modifier" onclick="modifier();" />
+					</p>
+				</fieldset>
+			</form>
+		</div>
+		<div id="zoneSuppressionProduit">
+			<form>
+				<h1>Suppression de produit</h1>
+				<p>
+						<label>ID du produit</label>
+						<input id="txtIdS" type="text" />
+						<input  type="button" value="Rechercher" onclick="rechercher();" />
+				</p>
+				<fieldset>
+					<legend>Produit à supprimer</legend>
+					<p>
+						<label>Description</label>
+						<input id="txtDescriptionS" type="text" disabled="disabled"/>
+					</p>
+					<p>
+						<label>Image</label>
+						<input id="txtImageS" type="text" disabled="disabled"/>
+					</p>
+					<p>
+						<label>Prix</label>
+						<input id="txtPrixS" type="text" disabled="disabled"/>
+					</p>
+					<p>
+						<label>Details</label>
+						<input id="txtDetailS" type="text" disabled="disabled"/>
+					</p>
+					<p>					
+						<input  type="button" value="Supprimer" onclick="supprimer();" />
+					</p>
+				</fieldset>
+			</form>
+		</div>
+		<div id="zoneListeProduit">
+			<h1>Liste de produit</h1>
+			<table border="1" width="80%">
+				<thead>
+					<th>Id</th>
+					<th>Description</th>
+					<th>Image</th>
+					<th>Prix</th>
+					<th>Details</th>
+				</thead>
+				<tbody id="idCorpsTableau">
+				</tbody>
+			</table>
+		</div>
+	</body>
+</html>
