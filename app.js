@@ -26,7 +26,14 @@ const con= mysql.createConnection({
  
 con.connect(function(err){
     if(err) throw err; 
-}); 
+});
+
+app.get("/", function(request, response){
+    con.query("SELECT * FROM Produit", function(err, result, fields){
+        if(err) throw err; 
+        response.status(200).json(result);
+    }); 
+});
 
 app.get("/getAllProducts", function(request, response){
     con.query("SELECT * FROM Produit", function(err, result, fields){
